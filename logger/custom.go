@@ -30,43 +30,43 @@ type CustomLogger struct {
 
 var logger *slog.Logger
 
-func WithWriter(wr io.Writer) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithWriter(wr io.Writer) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.writer = wr
 	}
 }
 
-func WithReplaceAttr(f ReplaceAttrFunc) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithReplaceAttr(f ReplaceAttrFunc) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.replaceAttr = f
 	}
 }
 
-func WithSource(b bool) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithSource(b bool) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.addSource = b
 	}
 }
 
-func WithHandle(h HandleFunc) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithHandle(h HandleFunc) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.handle = h
 	}
 }
 
-func WithLevel(l string) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithLevel(l string) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.level = l
 	}
 }
 
-func WithJSON(b bool) func(CustomLogger) {
-	return func(cl CustomLogger) {
+func WithJSON(b bool) func(*CustomLogger) {
+	return func(cl *CustomLogger) {
 		cl.isJSON = b
 	}
 }
 
-func New(opts ...func(l CustomLogger)) *slog.Logger {
+func New(opts ...func(l *CustomLogger)) *slog.Logger {
 	once.Do(func() {
 		handler := new(opts...)
 		logger = slog.New(handler)
@@ -75,13 +75,11 @@ func New(opts ...func(l CustomLogger)) *slog.Logger {
 	return logger
 }
 
-func new(opts ...func(l CustomLogger)) customHandler {
-	l := CustomLogger{
-		writer:      os.Stdout,
-		replaceAttr: replaceAttr,
-		isJSON:      true,
-		addSource:   true,
-		level:       "warn",
+// TODO: can write a test function for the same...
+func new(opts ...func(l *CustomLogger)) customHandler {
+	l := &CustomLogger{
+		writer: os.Stdout,
+		level:  "warn",
 	}
 
 	for _, opt := range opts {
@@ -89,9 +87,12 @@ func new(opts ...func(l CustomLogger)) customHandler {
 	}
 
 	options := slog.HandlerOptions{
-		AddSource:   l.addSource,
-		Level:       getLevel(l.level),
-		ReplaceAttr: l.replaceAttr,
+		AddSource: l.addSource,
+		Level:     getLevel(l.level),
+	}
+
+	if l.replaceAttr != nil {
+		options.ReplaceAttr = l.replaceAttr
 	}
 
 	if l.isJSON {
