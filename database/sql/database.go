@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-type dsn interface {
-	FormatDSN() string
-}
-
 // WithConnMaxLifeTime to call func SetConnMaxLifetime on db, default is 10 seconds
 func WithConnMaxLifeTime(i time.Duration) func(*sql.DB) {
 	return func(db *sql.DB) {
@@ -31,14 +27,14 @@ func WithMaxOpenConns(i int) func(*sql.DB) {
 	}
 }
 
-func New(d dsn, configFuncs ...func(*sql.DB)) *sql.DB {
-	db, err := sql.Open("mysql", d.FormatDSN())
+func New(dsn string, configFuncs ...func(*sql.DB)) *sql.DB {
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatalln("error while trying to create connection pool", d.FormatDSN(), err)
+		log.Fatalln("error while trying to create connection pool", dsn, err)
 	}
 
 	if err := db.Ping(); err != nil {
-		log.Fatalln("error while trying to ping", d.FormatDSN(), err.Error())
+		log.Fatalln("error while trying to ping", dsn, err.Error())
 	}
 
 	db.SetConnMaxLifetime(10 * time.Second)
