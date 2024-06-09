@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // WithConnMaxLifeTime to call func SetConnMaxLifetime on db, default is 10 seconds
