@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/mdobak/go-xerrors v0.3.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
