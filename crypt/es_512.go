@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"os"
@@ -12,6 +13,35 @@ import (
 
 	"github.com/golang-jwt/jwt"
 )
+
+func PublicKeyToJWK(publicKey *ecdsa.PublicKey) (string, error) {
+	// Get the curve name from the elliptic.Curve
+	var curve string
+	switch publicKey.Curve {
+	case elliptic.P256():
+		curve = "P-256"
+	case elliptic.P384():
+		curve = "P-384"
+	case elliptic.P521():
+		curve = "P-521"
+	default:
+		return "", fmt.Errorf("unsupported elliptic curve")
+	}
+
+	// Convert the public key coordinates to base64-encoded strings
+	x := base64.RawURLEncoding.EncodeToString(publicKey.X.Bytes())
+	y := base64.RawURLEncoding.EncodeToString(publicKey.Y.Bytes())
+
+	// Create the JWK object
+	jwk := fmt.Sprintf(`{
+		"kty": "EC",
+		"crv": "%s",
+		"x": "%s",
+		"y": "%s"
+	}`, curve, x, y)
+
+	return jwk, nil
+}
 
 // Function to parse and verify the JWT
 func ParseAndVerifyToken(tokenString string, publicKey *ecdsa.PublicKey, expectedIssuer, expectedAudience string) (jwt.MapClaims, error) {
