@@ -7,6 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/mdobak/go-xerrors v0.3.1
 	github.com/spf13/viper v1.19.0
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
